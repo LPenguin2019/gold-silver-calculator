@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>金包银计算器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; background: #f8f8f8; }
+    h2 { text-align: center; }
+    label { display: block; margin: 10px 0 5px; }
+    input, select, button { width: 100%; padding: 8px; margin-bottom: 15px; box-sizing: border-box; }
+    button { background: #007aff; color: white; border: none; border-radius: 5px; }
+    button:hover { background: #005bb5; }
+    .result { font-size: 20px; font-weight: bold; color: #d9534f; text-align: center; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>💰 金包银计算器</h2>
+
+  <label>金价（元/克）</label>
+  <input type="number" id="goldPrice" placeholder="请输入金价">
+
+  <label>银价（元/克）</label>
+  <input type="number" id="silverPrice" placeholder="请输入银价">
+
+  <label>金克重</label>
+  <input type="number" id="goldWeight" placeholder="请输入金克重">
+
+  <label>银克重</label>
+  <input type="number" id="silverWeight" placeholder="请输入银克重">
+
+  <label>手工费模式</label>
+  <select id="feeMode">
+    <option value="fixed">固定总额</option>
+    <option value="per_gram">按克价</option>
+  </select>
+
+  <div id="fixedFeeBox">
+    <label>固定手工费（元）</label>
+    <input type="number" id="fixedFee" placeholder="请输入固定工费">
+  </div>
+
+  <div id="perGramBox" style="display:none;">
+    <label>手工单价（元/克）</label>
+    <input type="number" id="feePerGram" placeholder="请输入手工单价">
+  </div>
+
+  <label>折扣（如 0.9 = 九折）</label>
+  <input type="number" step="0.01" id="discount" value="1.0">
+
+  <button onclick="calculate()">计算价格</button>
+
+  <div class="result" id="result">结果：-- 元</div>
+
+  <script>
+    // 读取本地存储的金价银价
+    document.getElementById("goldPrice").value = localStorage.getItem("goldPrice") || "";
+    document.getElementById("silverPrice").value = localStorage.getItem("silverPrice") || "";
+
+    // 手工费模式切换
+    document.getElementById("feeMode").addEventListener("change", function() {
+      if (this.value === "fixed") {
+        document.getElementById("fixedFeeBox").style.display = "block";
+        document.getElementById("perGramBox").style.display = "none";
+      } else {
+        document.getElementById("fixedFeeBox").style.display = "none";
+        document.getElementById("perGramBox").style.display = "block";
+      }
+    });
+
+    function calculate() {
+      const goldPrice = parseFloat(document.getElementById("goldPrice").value) || 0;
+      const silverPrice = parseFloat(document.getElementById("silverPrice").value) || 0;
+      const goldWeight = parseFloat(document.getElementById("goldWeight").value) || 0;
+      const silverWeight = parseFloat(document.getElementById("silverWeight").value) || 0;
+      const feeMode = document.getElementById("feeMode").value;
+      const fixedFee = parseFloat(document.getElementById("fixedFee").value) || 0;
+      const feePerGram = parseFloat(document.getElementById("feePerGram").value) || 0;
+      const discount = parseFloat(document.getElementById("discount").value) || 1;
+
+      // 保存金价银价，下次自动带出
+      localStorage.setItem("goldPrice", goldPrice);
+      localStorage.setItem("silverPrice", silverPrice);
+
+      let goldTotal = goldPrice * goldWeight;
+      let silverTotal = silverPrice * silverWeight;
+      let fee = 0;
+
+      if (feeMode === "fixed") {
+        fee = fixedFee * discount;
+      } else {
+        let totalWeight = goldWeight + silverWeight;
+        fee = totalWeight * feePerGram * discount;
+      }
+
+      let total = goldTotal + silverTotal + fee;
+      document.getElementById("result").innerText = "结果：" + total.toFixed(2) + " 元";
+    }
+  </script>
+</body>
+</html>
